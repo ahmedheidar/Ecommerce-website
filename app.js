@@ -1,5 +1,14 @@
 var express = require("express");
 var path = require("path");
+var app = express();
+const session = require('express-session');
+const MongoDBsession = require('connect-mongo-session')(session);
+app.use(session({
+  secret:"secret key",
+  resave:false,
+  saveUninitialized:false
+
+}))
 
 const mongo = require("./mongo");
 // const userSchema = require('./schemas/User');
@@ -14,7 +23,7 @@ const connectToMongo = async () => {
 };
 var currentUserName;
 
-var app = express();
+
 
 // view engine setup
 app.set("views", path.join(__dirname, "views"));
@@ -355,15 +364,18 @@ app.post("/search", function (req, res) {
     { name: "tennis racket", url: "/tennis", image: "tennis.jpg" },
   ];
   var result = filterIt(items, searchResult2);
+  var searchFound =1;
   if (result.length == 0) {
     result.push({
-      name: "Item not found",
-      url: "/home",
-      image: "item-not-found-feature.jpeg",
-    });
+      name:"",
+      url: "/cart",
+      image:"cart2.png"
+    })
+    searchFound =0;;
   }
-  res.render("searchresults", { searchres: result }); //object
+  res.render("searchresults", { searchres: result,searchFound:searchFound }); //object
 });
+
 
 function filterIt(arr, searchKey) {
   return arr.filter(function (obj) {
