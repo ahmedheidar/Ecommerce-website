@@ -1,18 +1,8 @@
 var express = require("express");
 var path = require("path");
 var app = express();
-const session = require('express-session');
-const MongoDBsession = require('connect-mongo-session')(session);
-app.use(session({
-  secret:"secret key",
-  resave:false,
-  saveUninitialized:false
-
-}))
-
-const mongo = require("./mongo");
-// const userSchema = require('./schemas/User');
-const userCart = require("./schemas/usercart");
+const session = require("express-session");
+const MongoDBsession = require("connect-mongodb-session")(session);
 const connectToMongo = async () => {
   await mongo().then(async (mongoose) => {
     try {
@@ -21,9 +11,24 @@ const connectToMongo = async () => {
     }
   });
 };
+
+const store = new MongoDBsession({
+  uri: "mongodb+srv://admin:admin1@cluster0.eynde.mongodb.net/thirddb?retryWrites=true&w=majority",
+  collection: "mySessions",
+});
+
+app.use(
+  session({
+    secret: "secret key",
+    resave: false,
+    saveUninitialized: false,
+    store: store,
+  })
+);
+
+const mongo = require("./mongo");
+const userCart = require("./schemas/usercart");
 var currentUserName;
-
-
 
 // view engine setup
 app.set("views", path.join(__dirname, "views"));
@@ -32,6 +37,14 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
 app.use(express.static(path.join(__dirname, "public")));
+
+const isAuth = (req,res,next) =>{
+  if(req.session.isAuth){
+    next();
+  }else{
+    res.render('login',{userNameFound:1,passwordFound:1});
+  }
+}
 
 // code to log-in
 app.get("/", function (req, res) {
@@ -61,8 +74,9 @@ app.post("/home", async function (req, res) {
     userNameFound = 0;
     passwordFound = 0;
   }
-
+  console.log(req.session.isAuth);
   if (userNameFound == 1 && passwordFound == 1) {
+    req.session.isAuth = true;
     res.render("home", { userNameFound: 1, passwordFound: 1 });
     currentUserName = user.username;
   } else if (userNameFound == 1 && passwordFound == 0) {
@@ -89,8 +103,7 @@ app.post("/register", async function (req, res) {
   });
   // console.log(result+"SDSDSD");
   console.log(result.length);
-  if (result.length < 1) {
-    //Should Add it to mydatabase
+  if (result.length<1) {
     await userCart(user).save();
     res.render("home", { userNameFound: 1, passwordFound: 1 });
   } else {
@@ -100,7 +113,7 @@ app.post("/register", async function (req, res) {
 
 //        ---Code For Each Item In Cart---
 
-app.post("/iPhone_13_Pro", async function (req, res) {
+app.post("/iPhone_13_Pro",async function (req, res) {
   var result = "iPhone_13_Pro";
   connectToMongo();
   console.log(result);
@@ -364,18 +377,17 @@ app.post("/search", function (req, res) {
     { name: "tennis racket", url: "/tennis", image: "tennis.jpg" },
   ];
   var result = filterIt(items, searchResult2);
-  var searchFound =1;
+  var searchFound = 1;
   if (result.length == 0) {
     result.push({
-      name:"",
+      name: "",
       url: "/cart",
-      image:"cart2.png"
-    })
-    searchFound =0;;
+      image: "cart2.png",
+    });
+    searchFound = 0;
   }
-  res.render("searchresults", { searchres: result,searchFound:searchFound }); //object
+  res.render("searchresults", { searchres: result, searchFound: searchFound }); //object
 });
-
 
 function filterIt(arr, searchKey) {
   return arr.filter(function (obj) {
@@ -390,37 +402,37 @@ function filterIt(arr, searchKey) {
 app.get("/registration", function (req, res) {
   res.render("registration", { userTaken: 0 });
 });
-app.get("/home", function (req, res) {
+app.get("/home", isAuth,function (req, res) {
   res.render("home");
 });
-app.get("/phones", function (req, res) {
-  res.render("phones",{itemExists:0});
+app.get("/phones", isAuth,function (req, res) {
+  res.render("phones", { itemExists: 0 });
 });
-app.get("/books", function (req, res) {
+app.get("/books",isAuth, function (req, res) {
   res.render("books");
 });
-app.get("/sports", function (req, res) {
+app.get("/sports", isAuth,function (req, res) {
   res.render("sports");
 });
-app.get("/galaxy", function (req, res) {
-  res.render("galaxy",{itemExists:0});
+app.get("/galaxy",isAuth, function (req, res) {
+  res.render("galaxy", { itemExists: 0 });
 });
-app.get("/iphone", function (req, res) {
-  res.render("iphone",{itemExists:0});
+app.get("/iphone",isAuth, function (req, res) {
+  res.render("iphone", { itemExists: 0 });
 });
-app.get("/leaves", function (req, res) {
-  res.render("leaves",{itemExists:0});
+app.get("/leaves",isAuth, function (req, res) {
+  res.render("leaves", { itemExists: 0 });
 });
-app.get("/sun", function (req, res) {
-  res.render("sun",{itemExists:0});
+app.get("/sun",isAuth, function (req, res) {
+  res.render("sun", { itemExists: 0 });
 });
-app.get("/boxing", function (req, res) {
-  res.render("boxing",{itemExists:0});
+app.get("/boxing",isAuth, function (req, res) {
+  res.render("boxing", { itemExists: 0 });
 });
-app.get("/tennis", function (req, res) {
-  res.render("tennis",{itemExists:0});
+app.get("/tennis",isAuth, function (req, res) {
+  res.render("tennis", { itemExists: 0 });
 });
-app.get("/cart", function (req, res) {
+app.get("/cart",isAuth, function (req, res) {
   res.render("cart", { searchres: [] });
 });
 
