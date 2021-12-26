@@ -3,6 +3,13 @@ var path = require("path");
 var app = express();
 const session = require("express-session");
 const MongoDBsession = require("connect-mongodb-session")(session);
+const mongo = require("./mongo");
+const userCart = require("./schemas/usercart");
+const store = new MongoDBsession({
+  uri: "mongodb+srv://admin:admin1@cluster0.eynde.mongodb.net/thirddb?retryWrites=true&w=majority",
+  collection: "mySessions",
+});
+//Connection to mongoose
 const connectToMongo = async () => {
   await mongo().then(async (mongoose) => {
     try {
@@ -11,12 +18,15 @@ const connectToMongo = async () => {
     }
   });
 };
-
-const store = new MongoDBsession({
-  uri: "mongodb+srv://admin:admin1@cluster0.eynde.mongodb.net/thirddb?retryWrites=true&w=majority",
-  collection: "mySessions",
-});
-
+//Authentication for login
+const isAuth = (req, res, next) => {
+  if (req.session.username) {
+    next();
+  } else {
+    res.render("login", { userNameFound: 1, passwordFound: 1 });
+  }
+};
+//Setup session
 app.use(
   session({
     secret: "secret key",
@@ -26,30 +36,77 @@ app.use(
   })
 );
 
-const mongo = require("./mongo");
-const userCart = require("./schemas/usercart");
-var currentUserName;
-
 // view engine setup
 app.set("views", path.join(__dirname, "views"));
 app.set("view engine", "ejs");
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
-
 app.use(express.static(path.join(__dirname, "public")));
 
-const isAuth = (req,res,next) =>{
-  if(req.session.isAuth){
-    next();
-  }else{
-    res.render('login',{userNameFound:1,passwordFound:1});
-  }
-}
-
-// code to log-in
 app.get("/", function (req, res) {
   res.render("login", { userNameFound: 1, passwordFound: 1 });
 });
+app.get("/registration", function (req, res) {
+  res.render("registration", { userTaken: 0 });
+});
+app.get("/home", isAuth, function (req, res) {
+  res.render("home");
+});
+app.get("/phones", isAuth, function (req, res) {
+  res.render("phones", { itemExists: 0 });
+});
+app.get("/books", isAuth, function (req, res) {
+  res.render("books");
+});
+app.get("/sports", isAuth, function (req, res) {
+  res.render("sports");
+});
+app.get("/galaxy", isAuth, function (req, res) {
+  res.render("galaxy", { itemExists: 0 });
+});
+app.get("/iphone", isAuth, function (req, res) {
+  res.render("iphone", { itemExists: 0 });
+});
+app.get("/leaves", isAuth, function (req, res) {
+  res.render("leaves", { itemExists: 0 });
+});
+app.get("/sun", isAuth, function (req, res) {
+  res.render("sun", { itemExists: 0 });
+});
+app.get("/boxing", isAuth, function (req, res) {
+  res.render("boxing", { itemExists: 0 });
+});
+app.get("/tennis", isAuth, function (req, res) {
+  res.render("tennis", { itemExists: 0 });
+});
+app.get("/cart", isAuth, function (req, res) {
+  res.render("cart", { searchres: [] });
+});
+
+app.post("/register", async function (req, res) {
+  //User Exists and Error mssgs left with ejs
+  connectToMongo();
+  var user = {
+    username: req.body.username,
+    password: req.body.password,
+    items: [],
+  };
+  console.log(req.body.username);
+
+  const result = await userCart.find({
+    username: req.body.username,
+  });
+  // console.log(result+"SDSDSD");
+  console.log(result.length);
+  if (result.length < 1) {
+    req.session.username = user.username;
+    await userCart(user).save();
+    res.render("home", { userNameFound: 1, passwordFound: 1 });
+  } else {
+    res.render("registration", { userTaken: 1 });
+  }
+});
+
 app.post("/home", async function (req, res) {
   connectToMongo();
   //I need to check that the req and res inside my
@@ -74,11 +131,11 @@ app.post("/home", async function (req, res) {
     userNameFound = 0;
     passwordFound = 0;
   }
-  console.log(req.session.isAuth);
+  console.log(findPasswordAndUserName);
   if (userNameFound == 1 && passwordFound == 1) {
-    req.session.isAuth = true;
+    req.session.username = user.username;
     res.render("home", { userNameFound: 1, passwordFound: 1 });
-    currentUserName = user.username;
+    req.session.username = user.username;
   } else if (userNameFound == 1 && passwordFound == 0) {
     res.render("login", { userNameFound: 1, passwordFound: 0 });
   } else {
@@ -86,38 +143,13 @@ app.post("/home", async function (req, res) {
   }
 });
 
-// code to register
-
-app.post("/register", async function (req, res) {
-  //User Exists and Error mssgs left with ejs
-  connectToMongo();
-  var user = {
-    username: req.body.username,
-    password: req.body.password,
-    items: [],
-  };
-  console.log(req.body.username);
-
-  const result = await userCart.find({
-    username: req.body.username,
-  });
-  // console.log(result+"SDSDSD");
-  console.log(result.length);
-  if (result.length<1) {
-    await userCart(user).save();
-    res.render("home", { userNameFound: 1, passwordFound: 1 });
-  } else {
-    res.render("registration", { userTaken: 1 });
-  }
-});
-
 //        ---Code For Each Item In Cart---
 
-app.post("/iPhone_13_Pro",async function (req, res) {
+app.post("/iPhone_13_Pro", async function (req, res) {
   var result = "iPhone_13_Pro";
   connectToMongo();
   console.log(result);
-  const cartOfUser = await userCart.findOne({ username: currentUserName });
+  const cartOfUser = await userCart.findOne({ username: req.session.username });
   var x = 0;
   var savedIndex = -1;
   for (let i = 0; i < cartOfUser.items.length; i++) {
@@ -134,7 +166,7 @@ app.post("/iPhone_13_Pro",async function (req, res) {
   if (x != 1) {
     await userCart.findOneAndUpdate(
       {
-        username: currentUserName,
+        username: req.session.username,
       },
       {
         $addToSet: {
@@ -155,7 +187,7 @@ app.post("/Galaxy_S21_Ultra", async function (req, res) {
   var result = "Galaxy_S21_Ultra";
   connectToMongo();
   console.log(result);
-  const cartOfUser = await userCart.findOne({ username: currentUserName });
+  const cartOfUser = await userCart.findOne({ username: req.session.username });
   var x = 0;
   var savedIndex = -1;
   for (let i = 0; i < cartOfUser.items.length; i++) {
@@ -172,7 +204,7 @@ app.post("/Galaxy_S21_Ultra", async function (req, res) {
   if (x != 1) {
     await userCart.findOneAndUpdate(
       {
-        username: currentUserName,
+        username: req.session.username,
       },
       {
         $addToSet: {
@@ -193,7 +225,7 @@ app.post("/Leaves_of_Grass", async function (req, res) {
   var result = "Leaves_of_Grass";
   connectToMongo();
   console.log(result);
-  const cartOfUser = await userCart.findOne({ username: currentUserName });
+  const cartOfUser = await userCart.findOne({ username: req.session.username });
   var x = 0;
   var savedIndex = -1;
   for (let i = 0; i < cartOfUser.items.length; i++) {
@@ -210,7 +242,7 @@ app.post("/Leaves_of_Grass", async function (req, res) {
   if (x != 1) {
     await userCart.findOneAndUpdate(
       {
-        username: currentUserName,
+        username: req.session.username,
       },
       {
         $addToSet: {
@@ -231,7 +263,7 @@ app.post("/The_Sun_and_Her_Flowers", async function (req, res) {
   var result = "The_Sun_and_Her_Flowers";
   connectToMongo();
   console.log(result);
-  const cartOfUser = await userCart.findOne({ username: currentUserName });
+  const cartOfUser = await userCart.findOne({ username: req.session.username });
   var x = 0;
   var savedIndex = -1;
   for (let i = 0; i < cartOfUser.items.length; i++) {
@@ -248,7 +280,7 @@ app.post("/The_Sun_and_Her_Flowers", async function (req, res) {
   if (x != 1) {
     await userCart.findOneAndUpdate(
       {
-        username: currentUserName,
+        username: req.session.username,
       },
       {
         $addToSet: {
@@ -269,7 +301,7 @@ app.post("/Boxing_Bag", async function (req, res) {
   var result = "Boxing_Bag";
   connectToMongo();
   console.log(result);
-  const cartOfUser = await userCart.findOne({ username: currentUserName });
+  const cartOfUser = await userCart.findOne({ username: req.session.username });
   var x = 0;
   var savedIndex = -1;
   for (let i = 0; i < cartOfUser.items.length; i++) {
@@ -286,7 +318,7 @@ app.post("/Boxing_Bag", async function (req, res) {
   if (x != 1) {
     await userCart.findOneAndUpdate(
       {
-        username: currentUserName,
+        username: req.session.username,
       },
       {
         $addToSet: {
@@ -307,7 +339,7 @@ app.post("/Tennis_Racket", async function (req, res) {
   var result = "Tennis_Racket";
   connectToMongo();
   console.log(result);
-  const cartOfUser = await userCart.findOne({ username: currentUserName });
+  const cartOfUser = await userCart.findOne({ username: req.session.username });
   var x = 0;
   var savedIndex = -1;
   for (let i = 0; i < cartOfUser.items.length; i++) {
@@ -324,7 +356,7 @@ app.post("/Tennis_Racket", async function (req, res) {
   if (x != 1) {
     await userCart.findOneAndUpdate(
       {
-        username: currentUserName,
+        username: req.session.username,
       },
       {
         $addToSet: {
@@ -345,7 +377,7 @@ app.post("/Tennis_Racket", async function (req, res) {
 
 //    Code For Cart and Search
 app.post("/cart", async function (req, res) {
-  var object = await userCart.findOne({ username: currentUserName }); //
+  var object = await userCart.findOne({ username: req.session.username }); //
   var cart = object.items;
   // var temp = [];
   // if (cart.length == 0) {
@@ -399,42 +431,6 @@ function filterIt(arr, searchKey) {
 //    -------------------
 
 //    Rendering Pages
-app.get("/registration", function (req, res) {
-  res.render("registration", { userTaken: 0 });
-});
-app.get("/home", isAuth,function (req, res) {
-  res.render("home");
-});
-app.get("/phones", isAuth,function (req, res) {
-  res.render("phones", { itemExists: 0 });
-});
-app.get("/books",isAuth, function (req, res) {
-  res.render("books");
-});
-app.get("/sports", isAuth,function (req, res) {
-  res.render("sports");
-});
-app.get("/galaxy",isAuth, function (req, res) {
-  res.render("galaxy", { itemExists: 0 });
-});
-app.get("/iphone",isAuth, function (req, res) {
-  res.render("iphone", { itemExists: 0 });
-});
-app.get("/leaves",isAuth, function (req, res) {
-  res.render("leaves", { itemExists: 0 });
-});
-app.get("/sun",isAuth, function (req, res) {
-  res.render("sun", { itemExists: 0 });
-});
-app.get("/boxing",isAuth, function (req, res) {
-  res.render("boxing", { itemExists: 0 });
-});
-app.get("/tennis",isAuth, function (req, res) {
-  res.render("tennis", { itemExists: 0 });
-});
-app.get("/cart",isAuth, function (req, res) {
-  res.render("cart", { searchres: [] });
-});
 
 if (process.env.PORT) {
   app.listen(process.env.PORT, function () {
