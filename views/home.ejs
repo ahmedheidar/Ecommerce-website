@@ -65,6 +65,7 @@
         <div class="collapse navbar-collapse" id="navbarSupportedContent">
             <ul class="navbar-nav mr-auto">
             </ul>
+        
             <form method="POST" action='/search' class="form-inline my-2 my-lg-0">
                 <input class="form-control mr-sm-2" name="Search"   id="myInput" type="search" placeholder="Search"
                 aria-label="Search" List="datalist" onkeyup="ac(this.value)">
@@ -122,7 +123,11 @@
                   
 
                 <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Search</button>
+                
             </form>
+            <form method="GET" action='/logout' class="form-inline my-2 my-lg-0">
+                <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Log out</button>
+                </form>
         </div>
     </nav>
 

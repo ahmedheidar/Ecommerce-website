@@ -43,6 +43,12 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(express.static(path.join(__dirname, "public")));
 
+
+app.get('/logout',isAuth,function(req,res){
+  req.session.destroy();
+  res.render('login',{userNameFound:1,passwordFound:1});
+
+})
 app.get("/", function (req, res) {
   res.render("login", { userNameFound: 1, passwordFound: 1 });
 });
@@ -145,10 +151,10 @@ app.post("/home", async function (req, res) {
 
 //        ---Code For Each Item In Cart---
 
+
 app.post("/iPhone_13_Pro", async function (req, res) {
   var result = "iPhone_13_Pro";
   connectToMongo();
-  console.log(result);
   const cartOfUser = await userCart.findOne({ username: req.session.username });
   var x = 0;
   var savedIndex = -1;
