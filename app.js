@@ -13,7 +13,7 @@ const store = new MongoDBsession({
 const connectToMongo = async () => {
   await mongo().then(async (mongoose) => {
     try {
-      console.log("Connected to MongoDB");
+     
     } finally {
     }
   });
@@ -99,13 +99,13 @@ app.post("/register", async function (req, res) {
     password: req.body.password,
     items: [],
   };
-  console.log(req.body.username);
+ 
 
   const result = await userCart.find({
     username: req.body.username,
   });
-  // console.log(result+"SDSDSD");
-  console.log(result.length);
+  
+  
   if (result.length < 1) {
     req.session.username = user.username;
     await userCart(user).save();
@@ -139,7 +139,7 @@ app.post("/home", async function (req, res) {
     userNameFound = 0;
     passwordFound = 0;
   }
-  console.log(findPasswordAndUserName);
+  
   if (userNameFound == 1 && passwordFound == 1) {
     req.session.username = user.username;
     res.render("home", { userNameFound: 1, passwordFound: 1 });
@@ -161,7 +161,7 @@ app.post("/iPhone_13_Pro", async function (req, res) {
   var x = 0;
   var savedIndex = -1;
   for (let i = 0; i < cartOfUser.items.length; i++) {
-    // console.log(cartOfUser.items[i].name);
+   
     if (cartOfUser.items[i].name == result) {
       savedIndex = i;
       x = 1;
@@ -194,12 +194,12 @@ app.post("/iPhone_13_Pro", async function (req, res) {
 app.post("/Galaxy_S21_Ultra", async function (req, res) {
   var result = "Galaxy_S21_Ultra";
   connectToMongo();
-  console.log(result);
+ 
   const cartOfUser = await userCart.findOne({ username: req.session.username });
   var x = 0;
   var savedIndex = -1;
   for (let i = 0; i < cartOfUser.items.length; i++) {
-    // console.log(cartOfUser.items[i].name);
+   
     if (cartOfUser.items[i].name == result) {
       savedIndex = i;
       x = 1;
@@ -232,12 +232,12 @@ app.post("/Galaxy_S21_Ultra", async function (req, res) {
 app.post("/Leaves_of_Grass", async function (req, res) {
   var result = "Leaves_of_Grass";
   connectToMongo();
-  console.log(result);
+
   const cartOfUser = await userCart.findOne({ username: req.session.username });
   var x = 0;
   var savedIndex = -1;
   for (let i = 0; i < cartOfUser.items.length; i++) {
-    // console.log(cartOfUser.items[i].name);
+   
     if (cartOfUser.items[i].name == result) {
       savedIndex = i;
       x = 1;
@@ -270,12 +270,11 @@ app.post("/Leaves_of_Grass", async function (req, res) {
 app.post("/The_Sun_and_Her_Flowers", async function (req, res) {
   var result = "The_Sun_and_Her_Flowers";
   connectToMongo();
-  console.log(result);
+
   const cartOfUser = await userCart.findOne({ username: req.session.username });
   var x = 0;
   var savedIndex = -1;
   for (let i = 0; i < cartOfUser.items.length; i++) {
-    // console.log(cartOfUser.items[i].name);
     if (cartOfUser.items[i].name == result) {
       savedIndex = i;
       x = 1;
@@ -308,12 +307,12 @@ app.post("/The_Sun_and_Her_Flowers", async function (req, res) {
 app.post("/Boxing_Bag", async function (req, res) {
   var result = "Boxing_Bag";
   connectToMongo();
-  console.log(result);
+ 
   const cartOfUser = await userCart.findOne({ username: req.session.username });
   var x = 0;
   var savedIndex = -1;
   for (let i = 0; i < cartOfUser.items.length; i++) {
-    // console.log(cartOfUser.items[i].name);
+   
     if (cartOfUser.items[i].name == result) {
       savedIndex = i;
       x = 1;
@@ -346,12 +345,12 @@ app.post("/Boxing_Bag", async function (req, res) {
 app.post("/Tennis_Racket", async function (req, res) {
   var result = "Tennis_Racket";
   connectToMongo();
-  console.log(result);
+ 
   const cartOfUser = await userCart.findOne({ username: req.session.username });
   var x = 0;
   var savedIndex = -1;
   for (let i = 0; i < cartOfUser.items.length; i++) {
-    // console.log(cartOfUser.items[i].name);
+   
     if (cartOfUser.items[i].name == result) {
       savedIndex = i;
       x = 1;
