@@ -43,7 +43,9 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(express.static(path.join(__dirname, "public")));
 
-
+app.get('/login',function(req,res){
+  res.render('login',{userNameFound:1,passwordFound:1});
+})
 app.get('/logout',isAuth,function(req,res){
   req.session.destroy();
   res.render('login',{userNameFound:1,passwordFound:1});
