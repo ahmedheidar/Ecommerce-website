@@ -13,7 +13,7 @@ const store = new MongoDBsession({
 const connectToMongo = async () => {
   await mongo().then(async (mongoose) => {
     try {
-     
+
     } finally {
     }
   });
@@ -43,14 +43,15 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(express.static(path.join(__dirname, "public")));
 
-app.get('/login',function(req,res){
-  res.render('login',{userNameFound:1,passwordFound:1});
+app.get('/login', function (req, res) {
+  res.render('login', { userNameFound: 1, passwordFound: 1 });
 })
-app.get('/logout',isAuth,function(req,res){
+app.get('/logout', isAuth, function (req, res) {
   req.session.destroy();
-  res.render('login',{userNameFound:1,passwordFound:1});
+  res.render('login', { userNameFound: 1, passwordFound: 1 });
 
 })
+
 app.get("/", function (req, res) {
   res.render("login", { userNameFound: 1, passwordFound: 1 });
 });
@@ -99,13 +100,13 @@ app.post("/register", async function (req, res) {
     password: req.body.password,
     items: [],
   };
- 
+
 
   const result = await userCart.find({
     username: req.body.username,
   });
-  
-  
+
+
   if (result.length < 1) {
     req.session.username = user.username;
     await userCart(user).save();
@@ -139,7 +140,7 @@ app.post("/home", async function (req, res) {
     userNameFound = 0;
     passwordFound = 0;
   }
-  
+
   if (userNameFound == 1 && passwordFound == 1) {
     req.session.username = user.username;
     res.render("home", { userNameFound: 1, passwordFound: 1 });
@@ -154,23 +155,28 @@ app.post("/home", async function (req, res) {
 //        ---Code For Each Item In Cart---
 
 
-app.post("/iPhone_13_Pro", async function (req, res) {
-  var result = "iPhone_13_Pro";
-  connectToMongo();
+
+
+
+
+
+
+
+
+app.post("/:name", async function (req, res) {
+  var result = req.params.name; //Name of the product
   const cartOfUser = await userCart.findOne({ username: req.session.username });
   var x = 0;
   var savedIndex = -1;
   for (let i = 0; i < cartOfUser.items.length; i++) {
-   
     if (cartOfUser.items[i].name == result) {
       savedIndex = i;
       x = 1;
       break;
     }
   }
-  var imageFile = "iphone.jpg";
-  var imageUrl = "/iphone";
-
+  var imageFile = result + ".jpg";
+  var imageUrl = "/" + result;
   if (x != 1) {
     await userCart.findOneAndUpdate(
       {
@@ -185,200 +191,16 @@ app.post("/iPhone_13_Pro", async function (req, res) {
         upsert: true,
       }
     );
-    res.render("iphone", { itemExists: 0 });
+    res.render(result, { itemExists: 0 });
   } else {
-    res.render("iphone", { itemExists: 1 });
+    res.render(result, { itemExists: 1 });
   }
-});
 
-app.post("/Galaxy_S21_Ultra", async function (req, res) {
-  var result = "Galaxy_S21_Ultra";
-  connectToMongo();
- 
-  const cartOfUser = await userCart.findOne({ username: req.session.username });
-  var x = 0;
-  var savedIndex = -1;
-  for (let i = 0; i < cartOfUser.items.length; i++) {
-   
-    if (cartOfUser.items[i].name == result) {
-      savedIndex = i;
-      x = 1;
-      break;
-    }
-  }
-  var imageFile = "galaxy.jpg";
-  var imageUrl = "/galaxy";
+})
 
-  if (x != 1) {
-    await userCart.findOneAndUpdate(
-      {
-        username: req.session.username,
-      },
-      {
-        $addToSet: {
-          items: { name: result, image: imageFile, url: imageUrl },
-        },
-      },
-      {
-        upsert: true,
-      }
-    );
-    res.render("galaxy", { itemExists: 0 });
-  } else {
-    res.render("galaxy", { itemExists: 1 });
-  }
-});
 
-app.post("/Leaves_of_Grass", async function (req, res) {
-  var result = "Leaves_of_Grass";
-  connectToMongo();
 
-  const cartOfUser = await userCart.findOne({ username: req.session.username });
-  var x = 0;
-  var savedIndex = -1;
-  for (let i = 0; i < cartOfUser.items.length; i++) {
-   
-    if (cartOfUser.items[i].name == result) {
-      savedIndex = i;
-      x = 1;
-      break;
-    }
-  }
-  var imageFile = "leaves.jpg";
-  var imageUrl = "/leaves";
 
-  if (x != 1) {
-    await userCart.findOneAndUpdate(
-      {
-        username: req.session.username,
-      },
-      {
-        $addToSet: {
-          items: { name: result, image: imageFile, url: imageUrl },
-        },
-      },
-      {
-        upsert: true,
-      }
-    );
-    res.render("leaves", { itemExists: 0 });
-  } else {
-    res.render("leaves", { itemExists: 1 });
-  }
-});
-
-app.post("/The_Sun_and_Her_Flowers", async function (req, res) {
-  var result = "The_Sun_and_Her_Flowers";
-  connectToMongo();
-
-  const cartOfUser = await userCart.findOne({ username: req.session.username });
-  var x = 0;
-  var savedIndex = -1;
-  for (let i = 0; i < cartOfUser.items.length; i++) {
-    if (cartOfUser.items[i].name == result) {
-      savedIndex = i;
-      x = 1;
-      break;
-    }
-  }
-  var imageFile = "sun.jpg";
-  var imageUrl = "/sun";
-
-  if (x != 1) {
-    await userCart.findOneAndUpdate(
-      {
-        username: req.session.username,
-      },
-      {
-        $addToSet: {
-          items: { name: result, image: imageFile, url: imageUrl },
-        },
-      },
-      {
-        upsert: true,
-      }
-    );
-    res.render("sun", { itemExists: 0 });
-  } else {
-    res.render("sun", { itemExists: 1 });
-  }
-});
-
-app.post("/Boxing_Bag", async function (req, res) {
-  var result = "Boxing_Bag";
-  connectToMongo();
- 
-  const cartOfUser = await userCart.findOne({ username: req.session.username });
-  var x = 0;
-  var savedIndex = -1;
-  for (let i = 0; i < cartOfUser.items.length; i++) {
-   
-    if (cartOfUser.items[i].name == result) {
-      savedIndex = i;
-      x = 1;
-      break;
-    }
-  }
-  var imageFile = "boxing.jpg";
-  var imageUrl = "/boxing";
-
-  if (x != 1) {
-    await userCart.findOneAndUpdate(
-      {
-        username: req.session.username,
-      },
-      {
-        $addToSet: {
-          items: { name: result, image: imageFile, url: imageUrl },
-        },
-      },
-      {
-        upsert: true,
-      }
-    );
-    res.render("boxing", { itemExists: 0 });
-  } else {
-    res.render("boxing", { itemExists: 1 });
-  }
-});
-
-app.post("/Tennis_Racket", async function (req, res) {
-  var result = "Tennis_Racket";
-  connectToMongo();
- 
-  const cartOfUser = await userCart.findOne({ username: req.session.username });
-  var x = 0;
-  var savedIndex = -1;
-  for (let i = 0; i < cartOfUser.items.length; i++) {
-   
-    if (cartOfUser.items[i].name == result) {
-      savedIndex = i;
-      x = 1;
-      break;
-    }
-  }
-  var imageFile = "tennis.jpg";
-  var imageUrl = "/tennis";
-
-  if (x != 1) {
-    await userCart.findOneAndUpdate(
-      {
-        username: req.session.username,
-      },
-      {
-        $addToSet: {
-          items: { name: result, image: imageFile, url: imageUrl },
-        },
-      },
-      {
-        upsert: true,
-      }
-    );
-    res.render("tennis", { itemExists: 0 });
-  } else {
-    res.render("tennis", { itemExists: 1 });
-  }
-});
 
 //        ---End Of Code For Each Item In Cart---
 
