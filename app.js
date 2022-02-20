@@ -163,7 +163,7 @@ app.post("/home", async function (req, res) {
 
 
 
-app.post("/:name", async function (req, res) {
+app.post("/add-to-cart/:name", async function (req, res) {
   var result = req.params.name; //Name of the product
   const cartOfUser = await userCart.findOne({ username: req.session.username });
   var x = 0;
