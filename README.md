@@ -1,4 +1,4 @@
-# CSEN 503 - Networks Project
+# Ecommerce Website
 ## Contributers
   * Roberto Joseph
   * Kareem Heidar
