@@ -36,14 +36,21 @@
             width: 300px;
             text-align: justify;
             text-justify: inter-word;
+            
         }
         .cart {
+          
             position: fixed;
             left: 30px;
             top: 470px;
+          
         }
         #my {
             zoom: 110%;
+        }
+        .ll{
+            background-image: url("background3.jpg");
+
         }
     </style>
     <meta charset="UTF-8">
@@ -130,12 +137,16 @@
     <div class="container2">
             2021 New Professional-grade Wilson 1Pc Hend Carbon Fiber Tennis Racket.
     </div>
+    <div class="ll">
+        
     <div class="cart">
-        <form method="POST" action='/Tennis_Racket' class="form-inline my-2 my-lg-0">
+        <form method="POST" action='/add-to-cart/tennis' class="form-inline my-2 my-lg-0">
                 <button id="cart" class="btn btn-secondary ml-3">Add to Cart</button>
         </form>
        
     </div>
+</div>
+
     <div class="video">
         <iframe width="560" height="315" src="https://www.youtube.com/embed/uuuLFuCEgew" 
         title="YouTube video player" frameborder="0"
